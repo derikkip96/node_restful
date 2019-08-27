@@ -1,5 +1,4 @@
 const Sequelize = require('sequelize');
-
 const Customer = sequelize.define('customer', {
 	customerid: {
 		type: Sequelize.STRING(300),
@@ -11,8 +10,7 @@ const Customer = sequelize.define('customer', {
 
 	phone: {
 		type: Sequelize.STRING(20),
-		allowNull: false,
-		primaryKey: true,
+		allowNull: true,
     },
     email: Sequelize.STRING(255),
 

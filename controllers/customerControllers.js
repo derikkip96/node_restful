@@ -26,15 +26,28 @@ router.post(
         if (!errors.isEmpty()) {
             return res.status(422).json({ errors: errors.array() });
           }
-          var hashedPassword = bcrypt.hashSync(req.body.password,8);
+          let hashedPassword = bcrypt.hashSync(req.body.password,10);
         
           Customer.create({
+            customerid: req.body.customerid,
             name: req.body.username,
             password: hashedPassword,
             phone: req.body.phone,
             email: req.body.email
-          }).then(customer => res.json(customer));
+          })
+          .then(customer => res.json(customer))
+          .catch(error => handleError(res, 500, error.message));
         });
+
+        function handleError(res, code, message) {
+          res.status(code).json({
+            errors: [
+              {
+                msg: message,
+              },
+            ],
+          });
+        }
 
 module.exports = router;
     
