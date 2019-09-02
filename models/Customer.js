@@ -1,12 +1,11 @@
 const Sequelize = require('sequelize');
 const Customer = sequelize.define('customer', {
-	customerid: {
-		type: Sequelize.STRING(300),
-		allowNull: false,
+	id: {
+		type: Sequelize.INTEGER,
+        autoIncrement: true,
 		primaryKey: true,
 	},
-
-	name: Sequelize.STRING(300),
+	name: Sequelize.STRING(200),
 
 	phone: {
 		type: Sequelize.STRING(20),
@@ -17,7 +16,16 @@ const Customer = sequelize.define('customer', {
 	password: Sequelize.STRING(255),
 
 	avatar: Sequelize.STRING(300),
+	createdAt:{
+        type:Sequelize.DATE,
+        field: 'created_at'
 
+      },
+      updatedAt:{
+        type:Sequelize.DATE,
+        field: 'updated_at'
+
+      },
 	// accesstoken: Sequelize.STRING(2664)   
 });
 module.exports = Customer;

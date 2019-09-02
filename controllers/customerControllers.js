@@ -29,8 +29,7 @@ router.post(
           let hashedPassword = bcrypt.hashSync(req.body.password,10);
         
           Customer.create({
-            customerid: req.body.customerid,
-            name: req.body.username,
+            name: req.body.name,
             password: hashedPassword,
             phone: req.body.phone,
             email: req.body.email
@@ -39,15 +38,29 @@ router.post(
           .catch(error => handleError(res, 500, error.message));
         });
 
-        function handleError(res, code, message) {
-          res.status(code).json({
-            errors: [
-              {
-                msg: message,
-              },
-            ],
-          });
-        }
+  router.get('/index', (req, res) => {
+    Customer.findAll()
+      .then(response => res.json(response))
+      .catch(error => {
+        res.status(error.status || 402);
+        res.json({
+          error: {
+            message: error.message,
+          },
+        });
+      });
+  });
+  
+
+  function handleError(res, code, message) {
+    res.status(code).json({
+      errors: [
+        {
+          msg: message,
+        },
+      ],
+    });
+  }
 
 module.exports = router;
     
