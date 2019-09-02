@@ -27,7 +27,7 @@ const Category = sequelize.define('category', {
     type:Sequelize.DATE,
     field: 'updated_at'
 
-  },      
+  },     
 });
 SequelizeSlugify.slugifyModel(Category, {
     source: ['name'],
@@ -35,7 +35,10 @@ SequelizeSlugify.slugifyModel(Category, {
     overwrite: false,
     column: 'slug'
 });
+Category.associate = function(models) {
+  Category.hasMany(models.Product,{as:'products'});
+};
 
-Category.hasMany(Product, {as:'products',foreignKey:'category_id'});
+
 
 module.exports = Category;

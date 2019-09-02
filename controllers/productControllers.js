@@ -43,14 +43,32 @@ router.get('/all', (req,res) =>{
     });
   });
 });
-//delete
-// router.delete(
-//   '/delete',
-//   Product.findAll(
-
-//   )
-// )
-
+delete
+router.delete(
+  '/delete/:id',  
+  (req,res) => {
+    Product.destroy(
+      {where:{
+        id:req.params.id
+      }
+    }).then(res.json("deleted successful")).catch((err) => console.log("Error while searching user : ", err));
+  }
+);
+//geting individual product
+router.get('/detail/:id',(req,res) => {
+  Product.findAll({
+    where:{
+      id:req.params.id
+    }
+  }).then(product => res.json(product)) .catch(error => {
+    res.status(error.status || 402);
+    res.json({
+      error: {
+        message: error.message,
+      },
+    });
+  });
+})
 //show products by category
 router.get('/category/:id', (req,res) =>{
   Product.findAll({
@@ -72,7 +90,6 @@ router.get('/category/:id', (req,res) =>{
     }
   );
 });
-
 function handleError(res, code, message) {
   res.status(code).json({
     errors: [

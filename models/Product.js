@@ -56,6 +56,9 @@ SequelizeSlugify.slugifyModel(Product, {
     overwrite: false,
     column: 'slug'
 });
-Product.belongsTo(Category,{foreignKey:'category_id'});
+Product.associate = function (models){
+  Product.belongsTo(models.Category,{foreignKey:'category_id'});
+}
+
 
 module.exports = Product;
