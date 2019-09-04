@@ -72,11 +72,12 @@ router.get('/detail/:id',(req,res) => {
 //show products by category
 router.get('/category/:id', (req,res) =>{
   Product.findAll({
+    where:{
+      category_id:req.params.id        
+    },
     include:[{
       model:Category,
-      where:{
-        category_id:req.param.id        
-      }
+      as:"category"
     }]
   } )
   .then(response => res.json(response))

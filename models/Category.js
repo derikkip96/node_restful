@@ -35,7 +35,7 @@ SequelizeSlugify.slugifyModel(Category, {
     overwrite: false,
     column: 'slug'
 });
-Category.associate = function(models) {
+Category.associate = (models) =>{
   Category.hasMany(models.Product);
 };
 
