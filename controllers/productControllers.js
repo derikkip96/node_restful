@@ -76,12 +76,12 @@ router.get('/category/:id', (req,res) =>{
       category_id:req.params.id        
     },
     include:[{
-      model:Category,
-      as:"category"
+      model:Category
     }]
   } )
   .then(response => res.json(response))
   .catch(error => {
+    console.log('error',  error)
       res.status(error.status || 402);
       res.json({
         error: {

@@ -4,7 +4,6 @@ const csurf = require('csurf');
 const bodyParser = require('body-parser');
 require('./config/database/db');
 const path = require('path');
-
 const http = require('http');
 
 const app = express();
@@ -12,10 +11,7 @@ const app = express();
 app.use('/static', express.static(path.join(__dirname, 'public')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-
- 
+app.use(bodyParser.urlencoded({ extended: true })); 
 
 
 
@@ -36,6 +32,12 @@ app.get('/', (req, res) =>
 		message: 'Urban Salon',
 	})
 );
+
+app.get('*', (req, res) => {
+	res.status(404).send({
+		message: "Page not found"
+	})
+})
 //routes
 // const categoriesroutes = require('./routes/category')
 // app.use('/category',categoriesroutes);
