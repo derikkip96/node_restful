@@ -43,7 +43,7 @@ router.get('/all', (req,res) =>{
     });
   });
 });
-delete
+// delete
 router.delete(
   '/delete/:id',  
   (req,res) => {
