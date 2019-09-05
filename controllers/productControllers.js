@@ -43,7 +43,32 @@ router.get('/all', (req,res) =>{
     });
   });
 });
-// delete
+/*update function */
+router.put(
+  '/update/:id',
+  (req,res) => {
+    Product.update({
+      name: req.body.name,
+      description: req.body.description,
+      price: req.body.price,
+      quantity: req.body.quantity,
+      category_id: req.body.category_id,
+      is_featured: req.body.is_featured
+    },{
+      where:{
+        id = req.params.id
+      }
+    })
+    .then(response => res.json(response))
+    .catch( res.json({
+      error: {
+        message: error.message,
+      },
+    })
+    )
+  }
+  );
+/*delete */
 router.delete(
   '/delete/:id',  
   (req,res) => {

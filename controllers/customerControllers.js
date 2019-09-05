@@ -34,7 +34,7 @@ router.post(
             phone: req.body.phone,
             email: req.body.email
           })
-          .then(customer => res.json(customer))
+          .then(r => res.json(r))
           .catch(error => handleError(res, 500, error.message));
         });
 
