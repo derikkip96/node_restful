@@ -1,66 +1,83 @@
-const express = require('express');
 const Customer = require('./../models/Customer');
-const router = express.Router();
-
 const bcrypt = require('bcrypt');
 
-const { check, validationResult } = require('express-validator');
+const { validationResult } = require('express-validator');
 
-
-router.post(
-    '/',
-    [
-        check('name').not().isEmpty(),
-        check('password').not().isEmpty().isLength({ min: 5 }),
-        check('phone').not().isEmpty().isMobilePhone(),
-        check('email').isEmail().normalizeEmail(),
-        check('passwordConfirmation').custom((value, { req }) => {
-            if (value !== req.body.password) {
-              throw new Error('Password confirmation does not match password');
-            }
-            return true;
-        })
-    ],
-    (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(422).json({ errors: errors.array() });
-          }
-          let hashedPassword = bcrypt.hashSync(req.body.password,10);
-        
-          Customer.create({
-            name: req.body.name,
-            password: hashedPassword,
-            phone: req.body.phone,
-            email: req.body.email
-          })
-          .then(r => res.json(r))
-          .catch(error => handleError(res, 500, error.message));
-        });
-
-  router.get('/index', (req, res) => {
-    Customer.findAll()
-      .then(response => res.json(response))
-      .catch(error => {
-        res.status(error.status || 402);
-        res.json({
-          error: {
-            message: error.message,
-          },
-        });
+exports.createCustomer = async (req,res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+    let hashedPassword = bcrypt.hashSync(req.body.password,10);
+    try{
+      const cust  = await Customer.create({
+        name: req.body.name,
+        password: hashedPassword,
+        phone: req.body.phone,
+        email: req.body.email
       });
-  });
-  
-
-  function handleError(res, code, message) {
-    res.status(code).json({
-      errors: [
-        {
-          msg: message,
-        },
-      ],
-    });
+      return res.status(201).json(cust);
+    }catch(error){
+      return handleError(res, 500, error.message);
+    }
   }
+exports.all = async (req,res) => {
+  try{
+    const cust = await Customer.findAll();
+    return res.status(200).json(cust); 
+  }catch(error){
+    return handleError(res, 402, error.message);
+  }
+}
 
-module.exports = router;
-    
+function handleError(res, code, message) {
+  res.status(code).json({
+    errors: [
+      {
+        msg: message,
+      },
+    ],
+  });
+}
+// trying authentication
+const jwt = require('jsonwebtoken');
+exports.login = (req, res, next) => {
+  Customer.findOne({ email: req.body.email }).then(
+    (customer) => {
+      if (!customer) {
+        return res.status(401).json({
+          error: new Error('User not found!')
+        });
+      }
+      bcrypt.compare(req.body.password, customer.password).then(
+        (valid) => {
+          if (!valid) {
+            return res.status(401).json({
+              error: new Error('Incorrect password!')
+            });
+          }
+          const token = jwt.sign(
+            { id: customer.id },
+            'RANDOM_TOKEN_SECRET',
+            { expiresIn: '24h' });
+          res.status(200).json({
+            id: customer.id,
+            token: token
+          });
+        }
+      ).catch(
+        (err) => {
+          res.status(500).json({
+            error: err+""
+          });
+        }
+      );
+    }
+  ).catch(
+    (err) => {
+      res.status(500).json({
+        error: err
+      });
+    }
+  );
+}

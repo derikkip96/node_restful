@@ -1,53 +1,42 @@
-const express = require('express');
 const Product = require('./../models/Product');
 const Category = require('./../models/Category');
-const router = express.Router();
+const { validationResult } = require('express-validator');
 
 
+//creating product
+exports.create = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+    try{
+      const product = await   Product.create({
+        name: req.body.name,
+        description: req.body.description,
+        price: req.body.price,
+        quantity: req.body.quantity,
+        category_id: req.body.category_id,
+        is_featured: req.body.is_featured
+      });
+      return res.status(201).json(product);
+    }catch(error){
+      return handleError(res, 500, error.message);
+    }        
+  }
+//getting all products
+exports.index = async (req,res) => {
+  try{
+    const product = await Product.findAll();
+    return res.status(200).json(product);
+  }catch(error){
+    return handleError(res, 500, error.message);
+  }
+}
 
-const { check, validationResult } = require('express-validator');
-router.post(
-    '/create',
-    [
-        check('name').not().isEmpty(),
-        check('description').isLength({ min: 30 }),
-        check('price').not().isEmpty().isNumeric(),
-        check('quantity').not().isEmpty().isNumeric(),
-        check('category_id').not().isEmpty(),
-    ],
-    (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(422).json({ errors: errors.array() });
-          }        
-          Product.create({
-            name: req.body.name,
-            description: req.body.description,
-            price: req.body.price,
-            quantity: req.body.quantity,
-            category_id: req.body.category_id,
-            is_featured: req.body.is_featured
-          })
-          .then(product => res.json(product))
-          .catch(error => handleError(res, 500, error.message));
-        });
-router.get('/all', (req,res) =>{
-  Product.findAll()
-  .then(response => res.json(response))
-  .catch(error => {
-    res.status(error.status || 402);
-    res.json({
-      error: {
-        message: error.message,
-      },
-    });
-  });
-});
 /*update function */
-router.put(
-  '/update/:id',
-  (req,res) => {
-    Product.update({
+exports.edit = async (req, res) =>{
+  try{
+    const product = await Product.update({
       name: req.body.name,
       description: req.body.description,
       price: req.body.price,
@@ -56,66 +45,65 @@ router.put(
       is_featured: req.body.is_featured
     },{
       where:{
-        id = req.params.id
+        id:req.params.id
       }
-    })
-    .then(response => res.json(response))
-    .catch( res.json({
-      error: {
-        message: error.message,
-      },
-    })
-    )
+    });    
+    return res.status(201).json({
+      success:true,
+      message:"updated successful"
+    });
+  }catch(error){
+    return handleError(res, 500, error.message);
   }
-  );
+}
 /*delete */
-router.delete(
-  '/delete/:id',  
-  (req,res) => {
-    Product.destroy(
+exports.delete = async (req,res) =>{
+  try{
+    const product = await   Product.destroy(
       {where:{
         id:req.params.id
       }
-    }).then(res.json("deleted successful")).catch((err) => console.log("Error while searching user : ", err));
-  }
-);
-//geting individual product
-router.get('/detail/:id',(req,res) => {
-  Product.findAll({
-    where:{
-      id:req.params.id
-    }
-  }).then(product => res.json(product)) .catch(error => {
-    res.status(error.status || 402);
-    res.json({
-      error: {
-        message: error.message,
-      },
     });
-  });
-})
+    return res.json({
+      success:true,
+      message:"deleted succesful"
+    }); 
+  }catch(error){
+    return handleError(res, 500, error.message);
+  }
+}
+
+
+//geting individual product
+exports.detail = async (req, res) => {
+  try{
+    const product = await Product.findAll({
+      where:{
+        id:req.params.id
+      }
+    });
+    return res.status(200).json(product);
+  }catch(error){
+    return handleError(res, 500, error.message);
+  }
+}
 //show products by category
-router.get('/category/:id', (req,res) =>{
-  Product.findAll({
-    where:{
-      category_id:req.params.id        
-    },
-    include:[{
-      model:Category
-    }]
-  } )
-  .then(response => res.json(response))
-  .catch(error => {
-    console.log('error',  error)
-      res.status(error.status || 402);
-      res.json({
-        error: {
-          message: error.message,
-        },
-      });
-    }
-  );
-});
+exports.productCategory = async (req, res) => {
+  try{
+    const product = await   Product.findAll({
+      where:{
+        category_id:req.params.id        
+      },
+      include:[{
+        model:Category
+      }]
+    } );
+    return res.status(200).json(product);
+  }catch(error){
+    return handleError(res, 500, error.message);
+  }
+}
+
 function handleError(res, code, message) {
   res.status(code).json({
     errors: [
@@ -125,7 +113,5 @@ function handleError(res, code, message) {
     ],
   });
 }
-
-module.exports = router;
     
 
