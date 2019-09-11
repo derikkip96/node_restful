@@ -20,8 +20,12 @@ const validateAccessToken = (req, res) => {
 };
 
 /* return an id or empty string */
-const getUserId = function getUserId(req, res) {
-	var token = req.headers['x-access-token'];
+const getUserId = (req, res) => {
+	let token = req.headers['x-access-token'] || req.headers['authorization'];
+    if (token.startsWith('Bearer ')) {
+        // Remove Bearer from string
+        token = token.slice(7, token.length);
+      }
 	if (!token) return '';
 	jwt.verify(token, config.key, function(err, decoded) {
 		if (err) return '';
@@ -32,7 +36,7 @@ const getUserId = function getUserId(req, res) {
 };
 
 /* return an id or empty string */
-const decodeUserId = function decodeUserId(token) {
+const decodeUserId = (token) => {
 
 	if (!token) return '';
 	jwt.verify(token, config.key, function (err, decoded) {
@@ -43,20 +47,8 @@ const decodeUserId = function decodeUserId(token) {
 	return id;
 };
 
-//function to handle error
-const handleError = function handleError(res, code, message) {
-	console.log("Error............" + message)
-	res.status(code).json({
-		errors: [
-			{ 
-				msg: message,
-			},
-		],
-	});
-};
 
 module.exports = {
-	handleError: handleError,
 	validateAccessToken: validateAccessToken,
 	getUserId: getUserId,
 	decodeUserId:decodeUserId,
