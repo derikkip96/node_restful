@@ -1,5 +1,6 @@
 const Customer = require('./../models/Customer');
 const bcrypt = require('bcrypt');
+let config = require('./../config/sckey');
 
 const { validationResult } = require('express-validator');
 
@@ -58,7 +59,7 @@ exports.login = (req, res, next) => {
           }
           const token = jwt.sign(
             { id: customer.id },
-            'RANDOM_TOKEN_SECRET',
+            config.secret,
             { expiresIn: '24h' });
           res.status(200).json({
             id: customer.id,
