@@ -13,14 +13,11 @@ app.use((req, res, next) => {
 	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
 	next();
   });
-
-app.use('/static', express.static(path.join(__dirname, 'public')));
+app.use(express.static('public'));
+app.use('/public/images', express.static(path.join(__dirname, 'public/images')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true })); 
-
-
-
 
 const Customer = require('./controllers/customerControllers');
 const Product = require('./controllers/productControllers');

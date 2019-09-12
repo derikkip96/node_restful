@@ -6,18 +6,21 @@ const { validationResult } = require('express-validator');
 //creating product
 exports.create = async (req, res) => {
   const errors = validationResult(req);
+  // req.body.product = JSON.parse(req.body.product);
+  const url = req.protocol + '://' + req.get('host');
   if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
     }
     try{
-      const product = await   Product.create({
+      const product = await Product.create({
         name: req.body.name,
         description: req.body.description,
         price: req.body.price,
         quantity: req.body.quantity,
         category_id: req.body.category_id,
-        is_featured: req.body.is_featured
-      });
+        is_featured: req.body.is_featured,
+        avatar: url + '/images/' + req.file.filename
+      });     
       return res.status(201).json(product);
     }catch(error){
       return handleError(res, 500, error.message);
@@ -35,19 +38,44 @@ exports.index = async (req,res) => {
 
 /*update function */
 exports.edit = async (req, res) =>{
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
   try{
-    const product = await Product.update({
-      name: req.body.name,
-      description: req.body.description,
-      price: req.body.price,
-      quantity: req.body.quantity,
-      category_id: req.body.category_id,
-      is_featured: req.body.is_featured
-    },{
-      where:{
-        id:req.params.id
-      }
-    });    
+     if (req.file) {
+       const url = req.protocol + '://' + req.get('host');
+       const product = await Product.update({
+         name: req.body.name,
+         description: req.body.description,
+         price: req.body.price,
+         quantity: req.body.quantity,
+         category_id: req.body.category_id,
+         is_featured: req.body.is_featured,
+         avatar: url + '/images/' + req.file.filename
+       },
+       {
+         where: {
+           id: req.params.id
+         }
+       });
+     } else {
+       const product = await Product.update({
+         name: req.body.name,
+         description: req.body.description,
+         price: req.body.price,
+         quantity: req.body.quantity,
+         category_id: req.body.category_id,
+         is_featured: req.body.is_featured,
+         avatar: req.body.avatar
+       },
+       {
+         where: {
+           id: req.params.id
+         }
+       }
+       );
+     }  
     return res.status(201).json({
       success:true,
       message:"updated successful"
